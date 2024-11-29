@@ -23,7 +23,7 @@ metadata = dict(
     maintainer="Paul Saves",
     maintainer_email="paul.saves@onera.fr",
     license="BSD-3",
-    packages=["smt_explainability"],
+    packages=["smt_explainability","smt_explainability.pdp","smt_explainability.problems","smt_explainability.shap" ],
     install_requires=["smt>=2.8.0", "smt-design-space-ext>=0.3.0"],
     extras_require={},
     python_requires=">=3.9",
