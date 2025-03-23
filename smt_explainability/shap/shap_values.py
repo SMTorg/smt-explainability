@@ -141,7 +141,7 @@ def weighted_least_squares_for_kernel_shap(
 def generate_binary_combinations(n):
     num_combinations = 2**n
     combinations = [
-        list(format(i, f"0{(num_combinations-1).bit_length()}b"))
+        list(format(i, f"0{(num_combinations - 1).bit_length()}b"))
         for i in range(num_combinations)
     ]
     combinations = np.array(combinations, dtype=int)
