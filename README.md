@@ -48,7 +48,7 @@ Code snippet
 
 @inproceedings{robani2025smtex,
   title={SMT-EX: An Explainable Surrogate Modeling Toolbox for Mixed-Variables Design Exploration},
-  author={Robani, Mohammad Daffa and Palar, Pramudita Satria and Zuhal, Lavi Rizki and Saves, Paul and Morlier, Joseph},
+  author={Robani, Mohammad Daffa and Saves, Paul and Palar, Pramudita Satria and Zuhal, Lavi Rizki and Morlier, Joseph},
   booktitle={AIAA SCITECH 2025 Forum},
   year={2025},
   doi={10.2514/6.2025-0777}
