@@ -1,0 +1,14 @@
+[run]
+source = smt_explainability
+omit =
+    tutorial/*
+    */tests/*
+
+[report]
+show_missing = True
+
+[paths]
+source =
+    smt_explainability/
+    /github/workspace/smt_explainability/
+    /home/runner/work/smt-explainability/smt-explainability/smt_explainability/

@@ -37,7 +37,9 @@ metadata = dict(
         "scipy>=1.17.1",
         "scikit-learn>=1.8.0",
     ],
-    extras_require={},
+    extras_require={
+        "test": ["pytest", "pytest-cov"],
+    },
     python_requires=">=3.11",
     zip_safe=False,
 )
