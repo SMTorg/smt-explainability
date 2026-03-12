@@ -52,6 +52,7 @@ def _partial_dependence_brute(
     method,
     sample_weight=None,
     ratio_samples=None,
+    seed=None,
 ):
     if isinstance(features, int):
         features = tuple([features])
@@ -60,12 +61,14 @@ def _partial_dependence_brute(
     lengths = [len(grid_value) for grid_value in grid_values]
     predictions = []
     averaged_predictions = []
+    rng = np.random.default_rng(seed)
+
     if ratio_samples is None:
         nsamples = nsamp
         x_samp = x.copy()
     else:
         nsamples = int(ratio_samples * nsamp)
-        index = np.random.choice(nsamp, nsamples, replace=False)
+        index = rng.choice(nsamp, nsamples, replace=False)
         x_samp = x[index]
 
     for new_values in grid_cartesian:
@@ -104,6 +107,7 @@ def partial_dependence(
     method="uniform",
     ratio_samples=None,
     categories_map=None,
+    seed=None,
 ):
     """
     Partial dependence.
@@ -165,6 +169,7 @@ def partial_dependence(
             method,
             sample_weight,
             ratio_samples,
+            seed=seed,
         )
 
         # storing values

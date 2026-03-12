@@ -17,7 +17,19 @@ class ShapFeatureImportanceDisplay:
         features=None,
         feature_names=None,
         categorical_feature_indices=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         if features is None:
             features = [i for i in range(x.shape[1])]
 
@@ -44,6 +56,7 @@ class ShapFeatureImportanceDisplay:
             x,
             is_categorical,
             method=method,
+            seed=seed,
         )
         feature_importances = np.array([feature_importances[feature_idx] for feature_idx in features])
 

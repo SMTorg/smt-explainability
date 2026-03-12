@@ -5,7 +5,25 @@ import numpy as np
 
 
 class PartialDependenceDisplay:
-    def __init__(self, pd_results, *, features, feature_names, is_categorical, seed=None):
+    def __init__(
+        self,
+        pd_results,
+        *,
+        features,
+        feature_names,
+        is_categorical,
+        seed=None,
+        random_state=None,
+    ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         self.pd_results = pd_results
         self.features = features
         self.feature_names = feature_names
@@ -27,7 +45,19 @@ class PartialDependenceDisplay:
         kind="average",
         ratio_samples=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         pd_results = partial_dependence(
             model,
             x,
@@ -39,6 +69,7 @@ class PartialDependenceDisplay:
             kind=kind,
             ratio_samples=ratio_samples,
             categories_map=categories_map,
+            seed=seed,
         )
 
         target_features = set()
@@ -60,14 +91,13 @@ class PartialDependenceDisplay:
             features=features,
             feature_names=feature_names,
             is_categorical=is_categorical,
+            seed=seed,
         )
         return display
 
     def _plot_ice_lines(self, categorical, preds, feature_values, n_ice_to_plot, ax, individual_line_kw):
-        if self.seed is None:
-            rng = np.random.mtrand._rand  # noqa
-        else:
-            rng = np.random.RandomState(self.seed)
+        # np.random.default_rng(None) handles using the global random state safely.
+        rng = np.random.default_rng(self.seed)
         if categorical:
             medianprops = {
                 "color": "black",

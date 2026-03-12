@@ -4,19 +4,19 @@ import math
 import numpy as np
 
 
-def compute_shap_values(model, x_obs, x_ref, is_categorical, *, method="kernel"):
+def compute_shap_values(model, x_obs, x_ref, is_categorical, *, method="kernel", seed=None):
     shap_values = list()
     # number of observations
     n_obs = len(x_obs)
     for i in range(n_obs):
         if method == "kernel":
             x = x_obs[i : i + 1, :].reshape(1, -1)
-            shap_value = kernel_shap_values(model, x, x_ref, is_categorical)
+            shap_value = kernel_shap_values(model, x, x_ref, is_categorical, seed=seed)
         elif method == "exact":
             x = x_obs[i : i + 1, :].reshape(
                 -1,
             )
-            shap_value = exact_shap_values(model, x, x_ref, is_categorical)
+            shap_value = exact_shap_values(model, x, x_ref, is_categorical, seed=seed)
         else:
             raise ValueError("Invalid method. It must be either 'kernel' or 'exact'.")
         shap_values.append(shap_value)
@@ -24,12 +24,12 @@ def compute_shap_values(model, x_obs, x_ref, is_categorical, *, method="kernel")
     return shap_values
 
 
-def kernel_shap_values(model, x, x_ref, is_categorical):
+def kernel_shap_values(model, x, x_ref, is_categorical, seed=None):
     num_features = x.shape[1]
     mask = create_mask_array(num_features)
     reference_values = np.ones(mask.shape)
     for i in range(len(reference_values)):
-        reference_values[i, :] = get_reference_feature_values(x_ref, is_categorical)
+        reference_values[i, :] = get_reference_feature_values(x_ref, is_categorical, seed=seed)
     s_ref = (mask == 0) * reference_values
     s_real = (mask == 1) * x
     s_full = s_ref + s_real
@@ -39,7 +39,7 @@ def kernel_shap_values(model, x, x_ref, is_categorical):
     return shap_value
 
 
-def exact_shap_values(model, x, x_ref, is_categorical):
+def exact_shap_values(model, x, x_ref, is_categorical, seed=None):
     num_features = x_ref.shape[1]
     shap_value = np.zeros(num_features)
 
@@ -60,7 +60,7 @@ def exact_shap_values(model, x, x_ref, is_categorical):
             subset_with_true_f[feature_idx] = 1
 
             # compute the marginal contribution
-            x_ref_current = get_reference_feature_values(x_ref, is_categorical)
+            x_ref_current = get_reference_feature_values(x_ref, is_categorical, seed=seed)
             x_subset = x_ref_current.copy()
             x_subset[subset_with_true_f == 1] = x[subset_with_true_f == 1]
             x_s_with_true_f[s, :] = x_subset
@@ -88,7 +88,7 @@ def create_mask_array(m):
     return mask
 
 
-def get_reference_feature_values(x, is_categorical):
+def get_reference_feature_values(x, is_categorical, seed=None):
     # get reference values for each feature
     # if the feature is categorical/ordinal -> random
     # else -> mean

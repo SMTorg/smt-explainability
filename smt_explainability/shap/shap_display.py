@@ -49,7 +49,18 @@ class ShapDisplay:
         *,
         feature_names=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         if feature_names is None:
             num_features = shap_values.shape[1]
             feature_names = [rf"$x_{i}$" for i in range(num_features)]
@@ -59,6 +70,7 @@ class ShapDisplay:
         self.feature_names = feature_names
         self.is_categorical = is_categorical
         self.categories_map = categories_map
+        self.seed = seed
 
     @classmethod
     def from_surrogate_model(
@@ -71,7 +83,18 @@ class ShapDisplay:
         feature_names=None,
         categorical_feature_indices=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         num_features = x.shape[1]
 
         # boolean flags for categorical variable indicator
@@ -93,6 +116,7 @@ class ShapDisplay:
             is_categorical,
             feature_names=feature_names,
             categories_map=categories_map,
+            seed=seed,
         )
         return display
 
@@ -467,6 +491,7 @@ class ShapDisplay:
                 self.shap_values.min(),
                 self.shap_values.max(),
                 max_strength=0.1,
+                seed=self.seed,
             )
 
             x_vals.append(x_vals_)
@@ -507,6 +532,7 @@ class ShapDisplay:
                 self.shap_values.min(),
                 self.shap_values.max(),
                 max_strength=0.1,
+                seed=self.seed,
             )
             x_vals.append(x_vals_)
             y_vals.append(y_vals_)
@@ -548,7 +574,7 @@ class ShapDisplay:
         return fig
 
 
-def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2):
+def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2, seed=None):
     delta = (max_value - min_value) / num_grid
     groups = x // delta
     prop_groups = dict()
@@ -565,7 +591,7 @@ def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2):
         jitter_scales[i] = jitter_scale
 
     y = np.array(y)
-    y_jitter = y + np.random.randn(len(y)) * jitter_scales
+    y_jitter = y + np.random.default_rng(seed).standard_normal(len(y)) * jitter_scales
     return y_jitter
 
 

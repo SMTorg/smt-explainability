@@ -12,7 +12,7 @@ from smt.design_space import (
 )
 import unittest
 import itertools
-import random
+import numpy as np
 
 
 class GroundTruthModel:
@@ -67,7 +67,8 @@ class TestPDInteractionDisplayNumerical(SMTestCase):
 
     def test_pd_pairwise_interaction(self):
         feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
-        random.shuffle(feature_pairs)
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_pd_interaction = PDFeatureInteractionDisplay.pairwise_interaction(
@@ -140,7 +141,8 @@ class TestPDInteractionDisplayMixed(SMTestCase):
 
     def test_pd_pairwise_interaction(self):
         feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
-        random.shuffle(feature_pairs)
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_pd_interaction = PDFeatureInteractionDisplay.pairwise_interaction(

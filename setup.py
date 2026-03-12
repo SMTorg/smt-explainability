@@ -32,8 +32,10 @@ metadata = dict(
     install_requires=[
         "smt>=2.13.0",
         "smt-design-space-ext>=0.3.0",
-        "pyDOE3>=1.5.0",
-        "scikit-learn>=1.2.0",
+        "pyDOE3>=1.6.2",
+        "numpy>=2.4.0",
+        "scipy>=1.17.1",
+        "scikit-learn>=1.8.0",
     ],
     extras_require={},
     python_requires=">=3.10",

@@ -11,7 +11,7 @@ from smt_explainability.pdp import pd_overall_interaction, pd_pairwise_interacti
 
 import itertools
 import unittest
-import random
+import numpy as np
 
 
 class GroundTruthModel:
@@ -53,7 +53,8 @@ class TestPDInteractionNumerical(SMTestCase):
 
     def test_pairwise_interaction(self):
         feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
-        random.shuffle(feature_pairs)
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_interaction = pd_pairwise_interaction(
@@ -123,7 +124,8 @@ class TestPDInteractionMixed(SMTestCase):
 
     def test_pairwise_interaction(self):
         feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
-        random.shuffle(feature_pairs)
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_interaction = pd_pairwise_interaction(

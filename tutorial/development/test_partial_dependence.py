@@ -18,6 +18,14 @@ plot_status = True
 
 from smt_explainability import partial_dependence
 
+class GroundTruthModel:
+    def __init__(self, fun):
+        self.fun = fun
+
+    def predict_values(self, x):
+        return self.fun(x)
+
+
 ndim = 2
 ndoe = 20  # int(10*ndim)
 fun = Rosenbrock(ndim=ndim)
@@ -25,5 +33,5 @@ sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
 xt = sampling(ndoe)
 
 features = [0]
-model = None
+model = GroundTruthModel(fun)
 pd_results = partial_dependence(model, xt, features)
