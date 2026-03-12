@@ -38,7 +38,7 @@ metadata = dict(
         "scikit-learn>=1.8.0",
     ],
     extras_require={},
-    python_requires=">=3.10",
+    python_requires=">=3.11",
     zip_safe=False,
 )
 
