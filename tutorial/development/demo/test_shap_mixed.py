@@ -131,14 +131,14 @@ feature_names = [
     r"$L$",
     r"$S$",
 ]
-cat_feature_indexes = [0]
+categorical_feature_indices = [0]
 # categories_map=None
 shap_explainer = ShapDisplay.from_surrogate_model(
     instances,
     model,
     X_tr,
     feature_names=feature_names,
-    cat_feature_indexes=cat_feature_indexes,
+    categorical_feature_indices=categorical_feature_indices,
     categories_map=categories_map,
 )
 
