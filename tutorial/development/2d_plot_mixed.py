@@ -126,7 +126,7 @@ class GroundTruthModel:
 sm = GroundTruthModel()
 start_time = time.time()
 y_pred = sm.predict_values(X_te)
-rmse = mean_squared_error(y_te, y_pred, squared=False)
+rmse = np.sqrt(mean_squared_error(y_te, y_pred))
 rrmse = rmse / y_te.mean()
 print(f"RMSE: {rmse:.4f}")
 print(f"rRMSE: {rrmse:.4f}")
