@@ -52,9 +52,7 @@ class TestPDFeatureImportance(SMTestCase):
         # model = sm
         model = GroundTruthModel(fun)
 
-        pdd_importance = PDFeatureImportanceDisplay.from_surrogate_model(
-            model, x, feature_names=feature_names
-        )
+        pdd_importance = PDFeatureImportanceDisplay.from_surrogate_model(model, x, feature_names=feature_names)
         pdd_importance.plot()
 
         assert len(pdd_importance.feature_importances) == x.shape[1]
@@ -80,10 +78,7 @@ class TestPDFeatureImportance(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         # sm = MixedIntegerKrigingModel(
         #     surrogate=KPLS(

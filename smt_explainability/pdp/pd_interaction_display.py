@@ -104,18 +104,14 @@ class PDFeatureInteractionDisplay:
         indexes = np.arange(len(vis_h_scores))
         fig, ax = plt.subplots(1, 1, figsize=(length, width))
         if vert:
-            ax.barh(
-                indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8
-            )
+            ax.barh(indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8)
             ax.set_yticks(indexes)
             ax.set_yticklabels(vis_feature_names, fontsize=14)
             ax.set_xlabel("H Score", fontsize=14)
             ax.xaxis.set_tick_params(labelsize=14)
             ax.invert_yaxis()
         else:
-            ax.bar(
-                indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8
-            )
+            ax.bar(indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8)
             ax.set_xticks(indexes)
             ax.set_xticklabels(vis_feature_names, fontsize=14)
             ax.set_ylabel("H Score", fontsize=14)

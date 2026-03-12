@@ -28,9 +28,7 @@ class PDFeatureImportanceDisplay:
         if feature_names is None:
             feature_names = [rf"$x_{i}$" for i in features]
         elif len(feature_names) != x.shape[1]:
-            raise ValueError(
-                "Length of feature names is not the same as the number of dimensions in x."
-            )
+            raise ValueError("Length of feature names is not the same as the number of dimensions in x.")
 
         if len(features) <= x.shape[1]:
             feature_names = [feature_names[feature_idx] for feature_idx in features]
@@ -80,9 +78,7 @@ class PDFeatureImportanceDisplay:
 
         if sort:
             vis_feature_names = feature_names[np.argsort(feature_importances * -1)]
-            vis_feature_importances = feature_importances[
-                np.argsort(feature_importances * -1)
-            ]
+            vis_feature_importances = feature_importances[np.argsort(feature_importances * -1)]
         else:
             vis_feature_names = feature_names
             vis_feature_importances = feature_importances

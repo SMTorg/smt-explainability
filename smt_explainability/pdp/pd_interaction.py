@@ -75,9 +75,7 @@ def pd_overall_interaction(
         y_pred = model.predict_values(x_eval).reshape(
             -1,
         )
-        h_score = compute_h_score(
-            y_pred, average_on_current_feature, average_on_other_features
-        )
+        h_score = compute_h_score(y_pred, average_on_current_feature, average_on_other_features)
         h_scores.append(h_score)
 
     return h_scores

@@ -52,9 +52,7 @@ class TestPDInteractionNumerical(SMTestCase):
         assert len(overall_interaction) == len(features)
 
     def test_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
         random.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
@@ -86,10 +84,7 @@ class TestPDInteractionMixed(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         # sm = MixedIntegerKrigingModel(
         #     surrogate=KPLS(
@@ -127,9 +122,7 @@ class TestPDInteractionMixed(SMTestCase):
         assert len(overall_interaction) == len(features)
 
     def test_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
         random.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 

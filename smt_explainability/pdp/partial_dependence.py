@@ -186,9 +186,7 @@ def partial_dependence(
 
         if has_categories == 1:
             grid_categories = []
-            for i, (is_category, grid_values_) in enumerate(
-                zip(is_categories, grid_values)
-            ):
+            for i, (is_category, grid_values_) in enumerate(zip(is_categories, grid_values)):
                 if is_category:
                     if categories_map is not None:
                         if isinstance(feature, int):

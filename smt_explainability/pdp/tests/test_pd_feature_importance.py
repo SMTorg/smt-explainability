@@ -69,10 +69,7 @@ class TestPDFeatureImportance(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         # sm = MixedIntegerKrigingModel(
         #     surrogate=KPLS(

@@ -16,9 +16,7 @@ class MixedCantileverBeam(Problem):
     def _initialize(self):
         self.options.declare("name", "MixedCantileverBeam", types=str)
         self.options.declare("Press", 50e3, types=(int, float), desc="Tip load (50 kN)")
-        self.options.declare(
-            "E_mod", 200e9, types=(int, float), desc="Modulus of elast. (200 GPa)"
-        )
+        self.options.declare("E_mod", 200e9, types=(int, float), desc="Modulus of elast. (200 GPa)")
 
     def _setup(self):
         self.options["ndim"] = 3

@@ -103,9 +103,7 @@ class TestPDInteractionDisplayNumerical(SMTestCase):
             assert set(pd_results[i].keys()) == {"grid_values", "average"}
             assert len(pd_results[i]["grid_values"]) == 2
             for j in range(len(pd_results[i]["grid_values"])):
-                assert pd_results[i]["grid_values"][j].shape == (
-                    self.grid_resolution_2d,
-                )
+                assert pd_results[i]["grid_values"][j].shape == (self.grid_resolution_2d,)
 
             assert pd_results[i]["average"].shape == (
                 self.grid_resolution_2d,
@@ -135,10 +133,7 @@ class TestPDInteractionDisplayMixed(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         feature_names = [r"$\tilde{I}$", r"$L$", r"$S$"]
 
@@ -194,9 +189,7 @@ class TestPDInteractionDisplayMixed(SMTestCase):
 
             if feature_idx in self.categorical_feature_indices:
                 desired_grid_values = np.unique(self.x[:, feature_idx])
-                desired_grid_categories = [
-                    self.categories_map[feature_idx][val] for val in desired_grid_values
-                ]
+                desired_grid_categories = [self.categories_map[feature_idx][val] for val in desired_grid_values]
 
                 assert set(pd_results[i].keys()) == {
                     "grid_values",
@@ -205,13 +198,8 @@ class TestPDInteractionDisplayMixed(SMTestCase):
                     "average",
                 }
                 assert len(pd_results[i]["grid_categories"]) == 1
-                np.testing.assert_array_equal(
-                    pd_results[i]["grid_values"][0], desired_grid_values
-                )
-                assert (
-                    list(pd_results[feature_idx]["grid_categories"][0])
-                    == desired_grid_categories
-                )
+                np.testing.assert_array_equal(pd_results[i]["grid_values"][0], desired_grid_values)
+                assert list(pd_results[feature_idx]["grid_categories"][0]) == desired_grid_categories
                 assert pd_results[i]["average"].shape == (len(desired_grid_values),)
                 assert pd_results[i]["individual"].shape == (
                     self.nsamples,
@@ -224,9 +212,7 @@ class TestPDInteractionDisplayMixed(SMTestCase):
                     "individual",
                     "average",
                 }
-                assert pd_results[i]["grid_values"][0].shape == (
-                    self.grid_resolution_1d,
-                )
+                assert pd_results[i]["grid_values"][0].shape == (self.grid_resolution_1d,)
                 assert pd_results[i]["individual"].shape == (
                     self.nsamples,
                     self.grid_resolution_1d,
@@ -255,18 +241,14 @@ class TestPDInteractionDisplayMixed(SMTestCase):
             assert len(pd_results[i]["grid_values"]) == 2
 
             cat_features = [
-                feature_idx
-                for feature_idx in feature_pair
-                if feature_idx in self.categorical_feature_indices
+                feature_idx for feature_idx in feature_pair if feature_idx in self.categorical_feature_indices
             ]
 
             if len(cat_features) > 0:
                 desired_average_shape = list()
                 for feature_idx in feature_pair:
                     if feature_idx in cat_features:
-                        desired_average_shape.append(
-                            len(np.unique(self.x[:, feature_idx]))
-                        )
+                        desired_average_shape.append(len(np.unique(self.x[:, feature_idx])))
                     else:
                         desired_average_shape.append(self.grid_resolution_2d)
                 desired_average_shape = tuple(desired_average_shape)
@@ -283,21 +265,11 @@ class TestPDInteractionDisplayMixed(SMTestCase):
                     feature_idx = feature_pair[j]
                     if feature_idx in cat_features:
                         desired_grid_values = np.unique(self.x[:, feature_idx])
-                        desired_grid_categories = [
-                            self.categories_map[feature_idx][val]
-                            for val in desired_grid_values
-                        ]
-                        np.testing.assert_array_equal(
-                            pd_results[i]["grid_values"][j], desired_grid_values
-                        )
-                        assert (
-                            list(pd_results[i]["grid_categories"][j])
-                            == desired_grid_categories
-                        )
+                        desired_grid_categories = [self.categories_map[feature_idx][val] for val in desired_grid_values]
+                        np.testing.assert_array_equal(pd_results[i]["grid_values"][j], desired_grid_values)
+                        assert list(pd_results[i]["grid_categories"][j]) == desired_grid_categories
                     else:
-                        assert pd_results[i]["grid_values"][j].shape == (
-                            self.grid_resolution_2d,
-                        )
+                        assert pd_results[i]["grid_values"][j].shape == (self.grid_resolution_2d,)
                         assert list(pd_results[i]["grid_categories"][j]) == []
 
             else:
@@ -306,9 +278,7 @@ class TestPDInteractionDisplayMixed(SMTestCase):
                     "average",
                 }
                 for j in range(2):
-                    assert pd_results[i]["grid_values"][j].shape == (
-                        self.grid_resolution_2d,
-                    )
+                    assert pd_results[i]["grid_values"][j].shape == (self.grid_resolution_2d,)
                 assert pd_results[i]["average"].shape == (
                     self.grid_resolution_2d,
                     self.grid_resolution_2d,
