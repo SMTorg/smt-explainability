@@ -11,4 +11,4 @@ show_missing = True
 source =
     smt_explainability/
     /github/workspace/smt_explainability/
-    /home/runner/work/smt-explainability/smt-explainability/smt_explainability/
+    /home/runner/work/smt-explainability/smt-explainability/
