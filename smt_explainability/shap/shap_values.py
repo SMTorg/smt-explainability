@@ -75,7 +75,7 @@ def exact_shap_values(model, x, x_ref, is_categorical, seed=None):
 
         f_s_with_true_f = model.predict_values(x_s_with_true_f)
         f_s = model.predict_values(x_s)
-        marginal_contributions = f_s_with_true_f - f_s
+        marginal_contributions = (f_s_with_true_f - f_s).flatten()
         shap_value[feature_idx] = np.dot(weight, marginal_contributions)
 
     return shap_value
