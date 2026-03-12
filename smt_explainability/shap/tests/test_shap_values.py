@@ -25,7 +25,7 @@ class TestPartialDependenceNumerical(SMTestCase):
         nsamples = 300
         n_train = int(0.8 * nsamples)
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         y = fun(x)
         x_tr, _y_tr = x[:n_train, :], y[:n_train]

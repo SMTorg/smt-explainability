@@ -6,13 +6,13 @@ import numpy as np
 
 class PartialDependenceDisplay:
     def __init__(
-        self, pd_results, *, features, feature_names, is_categorical, random_state=None
+        self, pd_results, *, features, feature_names, is_categorical, seed=None
     ):
         self.pd_results = pd_results
         self.features = features
         self.feature_names = feature_names
         self.is_categorical = is_categorical
-        self.random_state = random_state
+        self.seed = seed
 
     @classmethod
     def from_surrogate_model(
@@ -68,10 +68,10 @@ class PartialDependenceDisplay:
     def _plot_ice_lines(
         self, categorical, preds, feature_values, n_ice_to_plot, ax, individual_line_kw
     ):
-        if self.random_state is None:
+        if self.seed is None:
             rng = np.random.mtrand._rand  # noqa
         else:
-            rng = np.random.RandomState(self.random_state)
+            rng = np.random.RandomState(self.seed)
         if categorical:
             medianprops = {
                 "color": "black",

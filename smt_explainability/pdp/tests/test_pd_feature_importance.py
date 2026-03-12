@@ -25,7 +25,7 @@ class TestPDFeatureImportance(SMTestCase):
         nsamples = 300
         grid_resolution = 100
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 

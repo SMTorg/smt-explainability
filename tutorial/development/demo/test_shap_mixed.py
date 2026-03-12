@@ -4,7 +4,7 @@ dirname = "/Users/muhammaddaffarobani/Documents/personal_research/smt"
 if dirname not in sys.path:
     sys.path.append(dirname)
 
-from smt.utils.design_space import (
+from smt.design_space import (
     DesignSpace,
     FloatVariable,
     CategoricalVariable,
@@ -18,7 +18,7 @@ from smt.surrogate_models import (
     MixHrcKernelType,
 )
 from sklearn.metrics import mean_squared_error
-from smt.explainability_tools import ShapFeatureImportanceDisplay, ShapDisplay
+from smt_explainability import ShapDisplay
 
 import time
 import numpy as np

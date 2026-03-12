@@ -30,7 +30,7 @@ class TestPDInteractionDisplayNumerical(SMTestCase):
         grid_resolution_2d = 25
 
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 
