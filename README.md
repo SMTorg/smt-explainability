@@ -1,45 +1,79 @@
-# SMT Explainability 🧠
+# ⚙️ SMT Explainability
 
-**Enhancing SMT with Explainable AI for Surrogate Models**
+**Enhancing the Surrogate Modeling Toolbox (SMT) with Explainable AI**
 
-*A compact extension to the Surrogate Modeling Toolbox (SMT) that brings Explainable AI (XAI) techniques to surrogate models used in engineering: interpretation, visualization, and statistically-valid uncertainty.*
+*A lightweight extension bringing transparency, visualization, and robust uncertainty quantification to surrogate models in engineering design.*
 
 ---
 
-
 ## About
 
-`SMT Explainability` is an extension to the SMT (Surrogate Modeling Toolbox). It provides a collection of model-agnostic XAI methods tailored to surrogate models (Kriging, neural networks, etc.), with special care for mixed continuous/categorical inputs common in engineering design.
+`SMT Explainability` is an extension for the
+[Surrogate Modeling Toolbox (SMT)](https://smt.readthedocs.io/)
+that provides a collection of **model-agnostic Explainable AI (XAI) methods**
+specifically designed for surrogate models such as Kriging, RBF, polynomial models,
+and neural networks.
+
+The library focuses on **engineering design and simulation-based workflows**, with
+native support for **mixed continuous and categorical variables**, which are common
+in real-world optimization and surrogate modeling problems.
+
+It enables users to analyze, interpret, and validate surrogate models using
+state-of-the-art explainability techniques.
+
+---
 
 ## Key Features
 
-* **Model-agnostic interpretation** — Works with a wide range of surrogate models to reveal how predictions are produced.
-* **SHAP (Shapley Additive Explanations)** — Local and global explanations using Shapley values.
-* **PDP & ICE plots** — Partial Dependence and Individual Conditional Expectation visualizations for marginal effects and heterogeneity.
-* **Mixed-variable support** — Handles continuous and categorical (including mixed-integer) variables.
-* **Uncertainty quantification** — Split conformal prediction for robust, distribution-free prediction intervals.
-* **Global sensitivity analysis** — Sobol indices for variance-based sensitivity and corresponding visual reports.
+- **Model-Agnostic Explainability**  
+  Works with any SMT surrogate model to understand predictions and model behavior.
+
+- **SHAP (Shapley Additive Explanations)**  
+  Compute local and global feature contributions for surrogate predictions.
+
+- **PDP & ICE Plots**  
+  Partial Dependence and Individual Conditional Expectation plots for marginal effects.
+
+- **Mixed-Variable Support**  
+  Handles continuous, integer, categorical, and mixed design spaces.
+
+- **Uncertainty Quantification**  
+  Split conformal prediction for distribution-free prediction intervals.
+
+- **Global Sensitivity Analysis**  
+  Sobol indices and variance-based importance measures.
+
+- **Reproducible Sampling**
+  Deterministic random generators using `seed` for reproducible experiments.
+
+---
 
 ## Why It Matters
 
-Surrogate models replace expensive simulations in engineering workflows, but they can act as opaque black boxes. `SMT Explainability` helps engineers:
+Surrogate models replace expensive simulations in engineering workflows,
+but their black-box nature makes interpretation difficult.
 
-* **Build trust** by making model decisions transparent.
-* **Discover insight** such as non-linearities, interactions, and variable importance.
-* **Support decisions** with quantified contributions (why the model predicted X for a given input).
+`SMT Explainability` helps to:
+
+- **Build trust** in surrogate predictions
+- **Understand feature influence**
+- **Detect nonlinear effects and interactions**
+- **Support engineering decisions**
+- **Validate surrogate accuracy**
 
 ---
 
 ## Installation
 
+Install the latest release from PyPI:
+
 ```bash
 pip install smt-explainability
-```
 
-Or install from source:
+Or install from source the development version:
 
 ```bash
-git clone https://github.com/your-org/smt-explainability.git
+git clone https://github.com/SMTorg/smt-explainability.git
 cd smt-explainability
 pip install -e .
 ```
@@ -48,11 +82,12 @@ pip install -e .
 
 See `requirements.txt` for full details. Minimal requirements:
 
-* `smt` (Surrogate Modeling Toolbox)
-* `numpy`
-* `matplotlib`
-* `scikit-learn`
-
+smt >= 2.13.0
+numpy >= 2.4.0
+scipy >= 1.17.1
+scikit-learn >= 1.8.0
+matplotlib >= 3.10.0
+Python >= 3.11
 ---
 
 
@@ -69,8 +104,9 @@ If you use this package in research, please cite:
   doi={10.2514/6.2025-0777}
 }
 ```
-
 A short description of the validation cases (wing weight prediction, beam bending) and methodology is contained in the paper.
-
 ---
 
+
+## License
+This project is distributed under the BSD-3 CLause License.
