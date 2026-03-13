@@ -83,10 +83,15 @@ pip install -e .
 See `requirements.txt` for full details. Minimal requirements:
 
 smt >= 2.13.0
+
 numpy >= 2.4.0
+
 scipy >= 1.17.1
+
 scikit-learn >= 1.8.0
+
 matplotlib >= 3.10.0
+
 Python >= 3.11
 ---
 
