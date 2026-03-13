@@ -24,7 +24,7 @@ class TestPartialDependenceNumerical(SMTestCase):
     def setUp(self):
         nsamples = 300
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 

@@ -25,7 +25,7 @@ class TestPartialDependenceNumerical(SMTestCase):
         nsamples = 300
         n_train = int(0.8 * nsamples)
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         y = fun(x)
         x_tr, _y_tr = x[:n_train, :], y[:n_train]
@@ -120,10 +120,7 @@ class TestPartialDependenceMixed(SMTestCase):
         categories_map = dict()
         is_categorical = [False] * x.shape[1]
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
             is_categorical[feature_idx] = True
 
         feature_names = [r"$\tilde{I}$", r"$L$", r"$S$"]

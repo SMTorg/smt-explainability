@@ -5,26 +5,14 @@ dirname = "/Users/muhammaddaffarobani/Documents/personal_research/smt"
 if dirname not in sys.path:
     sys.path.append(dirname)
 
-from smt.utils.design_space import (
+from smt.design_space import (
     DesignSpace,
     FloatVariable,
     CategoricalVariable,
 )
-from smt.applications.mixed_integer import (
-    MixedIntegerKrigingModel,
-)
-from smt.surrogate_models import (
-    KPLS,
-    MixIntKernelType,
-    MixHrcKernelType,
-)
 from sklearn.metrics import mean_squared_error
-from smt.explainability_tools import (
+from smt_explainability import (
     PartialDependenceDisplay,
-    PDFeatureImportanceDisplay,
-    PDFeatureInteractionDisplay,
-    ShapFeatureImportanceDisplay,
-    ShapDisplay,
 )
 
 import time
@@ -138,7 +126,7 @@ class GroundTruthModel:
 sm = GroundTruthModel()
 start_time = time.time()
 y_pred = sm.predict_values(X_te)
-rmse = mean_squared_error(y_te, y_pred, squared=False)
+rmse = np.sqrt(mean_squared_error(y_te, y_pred))
 rrmse = rmse / y_te.mean()
 print(f"RMSE: {rmse:.4f}")
 print(f"rRMSE: {rrmse:.4f}")

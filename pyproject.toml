@@ -1,2 +1,12 @@
 [build-system]
 requires = ["setuptools"]
+
+[tool.ruff]
+# Exclude notebooks and tutorial folder from linting
+extend-exclude = ["*.ipynb", "tutorial/"]
+line-length = 120
+
+[tool.ruff.lint]
+# Enable standard Error (E), Pyflakes (F), and Warning (W)
+select = ["E", "F", "W"]
+ignore = ["E501"] # Ignore long lines if preferred, or keep it strict

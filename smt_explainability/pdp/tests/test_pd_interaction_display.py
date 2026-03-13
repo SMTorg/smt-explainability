@@ -12,7 +12,7 @@ from smt.design_space import (
 )
 import unittest
 import itertools
-import random
+import numpy as np
 
 
 class GroundTruthModel:
@@ -27,7 +27,7 @@ class TestPDInteractionDisplayNumerical(SMTestCase):
     def setUp(self):
         nsamples = 300
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 
@@ -66,10 +66,9 @@ class TestPDInteractionDisplayNumerical(SMTestCase):
         assert len(overall_pd_interaction.h_scores) == self.x.shape[1]
 
     def test_pd_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
-        random.shuffle(feature_pairs)
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_pd_interaction = PDFeatureInteractionDisplay.pairwise_interaction(
@@ -101,10 +100,7 @@ class TestPDInteractionDisplayMixed(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         feature_names = [r"$\tilde{I}$", r"$L$", r"$S$"]
 
@@ -144,10 +140,9 @@ class TestPDInteractionDisplayMixed(SMTestCase):
         assert len(overall_pd_interaction.h_scores) == self.x.shape[1]
 
     def test_pd_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
-        random.shuffle(feature_pairs)
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_pd_interaction = PDFeatureInteractionDisplay.pairwise_interaction(

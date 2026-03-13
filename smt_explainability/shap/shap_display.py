@@ -49,7 +49,18 @@ class ShapDisplay:
         *,
         feature_names=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         if feature_names is None:
             num_features = shap_values.shape[1]
             feature_names = [rf"$x_{i}$" for i in range(num_features)]
@@ -59,6 +70,7 @@ class ShapDisplay:
         self.feature_names = feature_names
         self.is_categorical = is_categorical
         self.categories_map = categories_map
+        self.seed = seed
 
     @classmethod
     def from_surrogate_model(
@@ -71,7 +83,18 @@ class ShapDisplay:
         feature_names=None,
         categorical_feature_indices=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         num_features = x.shape[1]
 
         # boolean flags for categorical variable indicator
@@ -93,6 +116,7 @@ class ShapDisplay:
             is_categorical,
             feature_names=feature_names,
             categories_map=categories_map,
+            seed=seed,
         )
         return display
 
@@ -185,9 +209,7 @@ class ShapDisplay:
                 category_args = dict()
                 if isinstance(sort_based_on_importance, dict):
                     if feature_id in sort_based_on_importance:
-                        category_args["sort_based_on_importance"] = (
-                            sort_based_on_importance[feature_id]
-                        )
+                        category_args["sort_based_on_importance"] = sort_based_on_importance[feature_id]
                     else:
                         category_args["sort_based_on_importance"] = True
                 elif isinstance(sort_based_on_importance, bool):
@@ -207,9 +229,7 @@ class ShapDisplay:
 
                 if isinstance(selected_entities, dict):
                     if feature_id in selected_entities:
-                        category_args["selected_entities"] = selected_entities[
-                            feature_id
-                        ]
+                        category_args["selected_entities"] = selected_entities[feature_id]
                     else:
                         category_args["selected_entities"] = None
                 else:
@@ -217,9 +237,7 @@ class ShapDisplay:
 
                 if isinstance(selected_entity_values, dict):
                     if feature_id in selected_entity_values:
-                        category_args["selected_entity_values"] = (
-                            selected_entity_values[feature_id]
-                        )
+                        category_args["selected_entity_values"] = selected_entity_values[feature_id]
                     else:
                         category_args["selected_entity_values"] = None
                 else:
@@ -313,9 +331,7 @@ class ShapDisplay:
 
                 if isinstance(sort_based_on_importance, dict):
                     if feature_id in sort_based_on_importance:
-                        category_args["sort_based_on_importance"] = (
-                            sort_based_on_importance[feature_id]
-                        )
+                        category_args["sort_based_on_importance"] = sort_based_on_importance[feature_id]
                     else:
                         category_args["sort_based_on_importance"] = True
                 elif isinstance(sort_based_on_importance, bool):
@@ -335,9 +351,7 @@ class ShapDisplay:
 
                 if isinstance(selected_entities, dict):
                     if feature_id in selected_entities:
-                        category_args["selected_entities"] = selected_entities[
-                            feature_id
-                        ]
+                        category_args["selected_entities"] = selected_entities[feature_id]
                     else:
                         category_args["selected_entities"] = None
                 else:
@@ -345,9 +359,7 @@ class ShapDisplay:
 
                 if isinstance(selected_entity_values, dict):
                     if feature_id in selected_entity_values:
-                        category_args["selected_entity_values"] = (
-                            selected_entity_values[feature_id]
-                        )
+                        category_args["selected_entity_values"] = selected_entity_values[feature_id]
                     else:
                         category_args["selected_entity_values"] = None
                 else:
@@ -456,9 +468,7 @@ class ShapDisplay:
         cmap = plt.cm.plasma  # noqa
         cmaplist = [cmap(i) for i in range(cmap.N)]
         # create the new map
-        cmap = mpl.colors.LinearSegmentedColormap.from_list(
-            "color_map", cmaplist, cmap.N
-        )
+        cmap = mpl.colors.LinearSegmentedColormap.from_list("color_map", cmaplist, cmap.N)
         bounds = np.linspace(0, 1, n_color + 1)
         norm = mpl.colors.BoundaryNorm(bounds, cmap.N)
         x_vals = list()
@@ -471,9 +481,7 @@ class ShapDisplay:
             min_feature_value = self.instances[:, feature_idx].min()
             max_feature_value = self.instances[:, feature_idx].max()
             range_feature_value = max_feature_value - min_feature_value
-            color_flags_ = (
-                self.instances[:, feature_idx] - min_feature_value
-            ) / range_feature_value
+            color_flags_ = (self.instances[:, feature_idx] - min_feature_value) / range_feature_value
 
             x_vals_ = self.shap_values[:, feature_idx]
             y_vals_ = jitter_y_based_on_x(
@@ -483,6 +491,7 @@ class ShapDisplay:
                 self.shap_values.min(),
                 self.shap_values.max(),
                 max_strength=0.1,
+                seed=self.seed,
             )
 
             x_vals.append(x_vals_)
@@ -496,9 +505,7 @@ class ShapDisplay:
             min_feature_value = self.instances[:, feature_idx].min()
             max_feature_value = self.instances[:, feature_idx].max()
             range_feature_value = max_feature_value - min_feature_value
-            color_flags_ = (
-                self.instances[:, feature_idx] - min_feature_value
-            ) / range_feature_value
+            color_flags_ = (self.instances[:, feature_idx] - min_feature_value) / range_feature_value
             x_vals_ = self.shap_values[:, feature_idx]
             for feature_idx in other_feature_indexes[1:]:
                 min_feature_value = self.instances[:, feature_idx].min()
@@ -508,8 +515,7 @@ class ShapDisplay:
                 color_flags_ = np.concatenate(
                     [
                         color_flags_,
-                        (self.instances[:, feature_idx] - min_feature_value)
-                        / range_feature_value,
+                        (self.instances[:, feature_idx] - min_feature_value) / range_feature_value,
                     ]
                 )
                 x_vals_ = np.concatenate(
@@ -526,6 +532,7 @@ class ShapDisplay:
                 self.shap_values.min(),
                 self.shap_values.max(),
                 max_strength=0.1,
+                seed=self.seed,
             )
             x_vals.append(x_vals_)
             y_vals.append(y_vals_)
@@ -567,7 +574,7 @@ class ShapDisplay:
         return fig
 
 
-def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2):
+def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2, seed=None):
     delta = (max_value - min_value) / num_grid
     groups = x // delta
     prop_groups = dict()
@@ -584,7 +591,7 @@ def jitter_y_based_on_x(x, y, num_grid, min_value, max_value, max_strength=0.2):
         jitter_scales[i] = jitter_scale
 
     y = np.array(y)
-    y_jitter = y + np.random.randn(len(y)) * jitter_scales
+    y_jitter = y + np.random.default_rng(seed).standard_normal(len(y)) * jitter_scales
     return y_jitter
 
 
@@ -619,10 +626,7 @@ def categorical_dependence_plot(
     if selected_entities_ is not None:
         selected_entities = np.array(selected_entities_)
     elif selected_entity_values is not None:
-        selected_entities = [
-            get_key(value, categories_map[feature_idx])
-            for value in selected_entity_values
-        ]
+        selected_entities = [get_key(value, categories_map[feature_idx]) for value in selected_entity_values]
         selected_entities = np.array(selected_entities)
     else:
         selected_entities = unique_entities
@@ -638,9 +642,7 @@ def categorical_dependence_plot(
     if (selected_entities_ is None) and (selected_entity_values is None):
         selected_entities = selected_entities[:max_num_entities]
 
-    other_entities = np.array(
-        [e for e in unique_entities if e not in selected_entities]
-    )
+    other_entities = np.array([e for e in unique_entities if e not in selected_entities])
 
     disp_shap_values = list()
     avg_shap_values = list()
@@ -655,9 +657,7 @@ def categorical_dependence_plot(
             xtick_labels.append(categories_map[feature_idx][entity])
 
     if len(other_entities) > 0:
-        other_shap_values = shap_values[instances[:, feature_idx] == other_entities[0]][
-            :, feature_idx
-        ]
+        other_shap_values = shap_values[instances[:, feature_idx] == other_entities[0]][:, feature_idx]
         for entity in other_entities[1:]:
             other_shap_values = np.concatenate(
                 [
@@ -744,19 +744,14 @@ def categorical_interaction_plot(
     if selected_entities_ is not None:
         selected_entities = np.array(selected_entities_)
     elif selected_entity_values is not None:
-        selected_entities = [
-            get_key(value, categories_map[feature_j])
-            for value in selected_entity_values
-        ]
+        selected_entities = [get_key(value, categories_map[feature_j]) for value in selected_entity_values]
         selected_entities = np.array(selected_entities)
     else:
         selected_entities = unique_entities
 
     entity_importance = np.zeros(len(selected_entities))
     for entity_id, entity in enumerate(selected_entities):
-        importance = np.abs(
-            shap_values[:, feature_j][feature_j_values == entity]
-        ).mean()
+        importance = np.abs(shap_values[:, feature_j][feature_j_values == entity]).mean()
         entity_importance[entity_id] = importance
 
     if sort_based_on_importance:
@@ -765,9 +760,7 @@ def categorical_interaction_plot(
     if (selected_entities_ is None) and (selected_entity_values is None):
         selected_entities = selected_entities[:max_num_entities]
 
-    other_entities = np.array(
-        [e for e in unique_entities if e not in selected_entities]
-    )
+    other_entities = np.array([e for e in unique_entities if e not in selected_entities])
 
     entities_color_dict = dict()
     handles = list()

@@ -25,7 +25,7 @@ class TestPDFeatureImportance(SMTestCase):
         nsamples = 300
         grid_resolution = 100
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 
@@ -69,10 +69,7 @@ class TestPDFeatureImportance(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         # sm = MixedIntegerKrigingModel(
         #     surrogate=KPLS(

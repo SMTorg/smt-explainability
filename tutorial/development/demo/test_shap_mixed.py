@@ -4,7 +4,7 @@ dirname = "/Users/muhammaddaffarobani/Documents/personal_research/smt"
 if dirname not in sys.path:
     sys.path.append(dirname)
 
-from smt.utils.design_space import (
+from smt.design_space import (
     DesignSpace,
     FloatVariable,
     CategoricalVariable,
@@ -18,7 +18,7 @@ from smt.surrogate_models import (
     MixHrcKernelType,
 )
 from sklearn.metrics import mean_squared_error
-from smt.explainability_tools import ShapFeatureImportanceDisplay, ShapDisplay
+from smt_explainability import ShapDisplay
 
 import time
 import numpy as np
@@ -119,7 +119,7 @@ sm.set_training_values(X_tr, np.array(y_tr))
 sm.train()
 print("run time (s):", time.time() - start_time)
 y_pred = sm.predict_values(X_te)
-rmse = mean_squared_error(y_te, y_pred, squared=False)
+rmse = np.sqrt(mean_squared_error(y_te, y_pred))
 rrmse = rmse / y_te.mean()
 print(f"RMSE: {rmse:.4f}")
 print(f"rRMSE: {rrmse:.4f}")
@@ -131,14 +131,14 @@ feature_names = [
     r"$L$",
     r"$S$",
 ]
-cat_feature_indexes = [0]
+categorical_feature_indices = [0]
 # categories_map=None
 shap_explainer = ShapDisplay.from_surrogate_model(
     instances,
     model,
     X_tr,
     feature_names=feature_names,
-    cat_feature_indexes=cat_feature_indexes,
+    categorical_feature_indices=categorical_feature_indices,
     categories_map=categories_map,
 )
 

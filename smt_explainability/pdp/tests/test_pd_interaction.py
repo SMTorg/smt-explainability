@@ -11,7 +11,7 @@ from smt_explainability.pdp import pd_overall_interaction, pd_pairwise_interacti
 
 import itertools
 import unittest
-import random
+import numpy as np
 
 
 class GroundTruthModel:
@@ -26,7 +26,7 @@ class TestPDInteractionNumerical(SMTestCase):
     def setUp(self):
         nsamples = 300
         fun = WingWeight()
-        sampling = LHS(xlimits=fun.xlimits, criterion="ese", random_state=1)
+        sampling = LHS(xlimits=fun.xlimits, criterion="ese", seed=1)
         x = sampling(nsamples)
         fun(x)
 
@@ -52,10 +52,9 @@ class TestPDInteractionNumerical(SMTestCase):
         assert len(overall_interaction) == len(features)
 
     def test_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
-        random.shuffle(feature_pairs)
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_interaction = pd_pairwise_interaction(
@@ -86,10 +85,7 @@ class TestPDInteractionMixed(SMTestCase):
         # create mapping for the categories
         categories_map = dict()
         for feature_idx in categorical_feature_indices:
-            categories_map[feature_idx] = {
-                i: value
-                for i, value in enumerate(ds._design_variables[feature_idx].values)
-            }
+            categories_map[feature_idx] = {i: value for i, value in enumerate(ds._design_variables[feature_idx].values)}
 
         # sm = MixedIntegerKrigingModel(
         #     surrogate=KPLS(
@@ -127,10 +123,9 @@ class TestPDInteractionMixed(SMTestCase):
         assert len(overall_interaction) == len(features)
 
     def test_pairwise_interaction(self):
-        feature_pairs = list(
-            itertools.combinations([i for i in range(self.x.shape[1])], 2)
-        )
-        random.shuffle(feature_pairs)
+        feature_pairs = list(itertools.combinations([i for i in range(self.x.shape[1])], 2))
+        rng = np.random.default_rng(1)
+        rng.shuffle(feature_pairs)
         feature_pairs = feature_pairs[: self.num_feature_pairs]
 
         pairwise_interaction = pd_pairwise_interaction(

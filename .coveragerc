@@ -1,0 +1,18 @@
+[run]
+# ensure coverage stores relative paths (required by coveralls action)
+relative_files = True
+source = smt_explainability
+
+[report]
+show_missing = True
+omit =
+    tutorial/*
+    */tests/*
+
+# optional: keep paths only if you have special mapping needs.
+# The relative_files setting usually removes the need for explicit [paths] entries.
+# [paths]
+# source =
+#   smt_explainability/
+#   /github/workspace/smt_explainability/
+#   /home/runner/work/smt-explainability/smt-explainability/

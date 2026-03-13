@@ -6,13 +6,29 @@ import numpy as np
 
 class PartialDependenceDisplay:
     def __init__(
-        self, pd_results, *, features, feature_names, is_categorical, random_state=None
+        self,
+        pd_results,
+        *,
+        features,
+        feature_names,
+        is_categorical,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
         self.pd_results = pd_results
         self.features = features
         self.feature_names = feature_names
         self.is_categorical = is_categorical
-        self.random_state = random_state
+        self.seed = seed
 
     @classmethod
     def from_surrogate_model(
@@ -29,7 +45,19 @@ class PartialDependenceDisplay:
         kind="average",
         ratio_samples=None,
         categories_map=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         pd_results = partial_dependence(
             model,
             x,
@@ -41,6 +69,7 @@ class PartialDependenceDisplay:
             kind=kind,
             ratio_samples=ratio_samples,
             categories_map=categories_map,
+            seed=seed,
         )
 
         target_features = set()
@@ -62,16 +91,13 @@ class PartialDependenceDisplay:
             features=features,
             feature_names=feature_names,
             is_categorical=is_categorical,
+            seed=seed,
         )
         return display
 
-    def _plot_ice_lines(
-        self, categorical, preds, feature_values, n_ice_to_plot, ax, individual_line_kw
-    ):
-        if self.random_state is None:
-            rng = np.random.mtrand._rand  # noqa
-        else:
-            rng = np.random.RandomState(self.random_state)
+    def _plot_ice_lines(self, categorical, preds, feature_values, n_ice_to_plot, ax, individual_line_kw):
+        # np.random.default_rng(None) handles using the global random state safely.
+        rng = np.random.default_rng(self.seed)
         if categorical:
             medianprops = {
                 "color": "black",
@@ -106,9 +132,7 @@ class PartialDependenceDisplay:
             # ax.plot([], [], **individual_line_kw_label)
 
     @staticmethod
-    def _plot_average_dependence(
-        categorical, kind_plot, avg_preds, feature_values, ax, line_kw
-    ):
+    def _plot_average_dependence(categorical, kind_plot, avg_preds, feature_values, ax, line_kw):
         # print(avg_preds, categorical, kind_plot)
         if categorical:
             if kind_plot == "both":
@@ -146,14 +170,10 @@ class PartialDependenceDisplay:
         legend_location,
     ):
         if kind in ["individual", "both"]:
-            self._plot_ice_lines(
-                categorical, preds, feature_values, n_ice_lines, ax, ice_lines_kw
-            )
+            self._plot_ice_lines(categorical, preds, feature_values, n_ice_lines, ax, ice_lines_kw)
 
         if kind in ["average", "both"]:
-            self._plot_average_dependence(
-                categorical, kind, avg_preds.ravel(), feature_values, ax, pd_line_kw
-            )
+            self._plot_average_dependence(categorical, kind, avg_preds.ravel(), feature_values, ax, pd_line_kw)
 
         if kind in ["individual", "both"]:
             max_val = preds.max()
@@ -346,9 +366,7 @@ class PartialDependenceDisplay:
             for i in legend_locations:
                 legend_locations_[i] = legend_locations[i]
         else:
-            raise TypeError(
-                "Wrong type of legend locations. It must be string or dictionary."
-            )
+            raise TypeError("Wrong type of legend locations. It must be string or dictionary.")
 
         kind = []
         for pd_result in self.pd_results:
@@ -392,11 +410,7 @@ class PartialDependenceDisplay:
             pdp_lim = {}
             for kind_plot, pd_result in zip(kind, pd_results_):
                 values = pd_result["grid_values"]
-                preds = (
-                    pd_result["average"]
-                    if kind_plot == "average"
-                    else pd_result["individual"]
-                )
+                preds = pd_result["average"] if kind_plot == "average" else pd_result["individual"]
                 min_pd = preds.min()
                 max_pd = preds.max()
 

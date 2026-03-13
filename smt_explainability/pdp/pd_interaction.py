@@ -12,12 +12,14 @@ def pd_pairwise_interaction(
     *,
     ratio_samples=None,
     categorical_feature_indices=None,
+    seed=None,
 ):
     if ratio_samples is None:
         x_eval = x.copy()
     else:
+        rng = np.random.default_rng(seed)
         num_samples = int(ratio_samples * len(x))
-        indexes = np.random.choice(x.shape[0], size=num_samples, replace=False)
+        indexes = rng.choice(x.shape[0], size=num_samples, replace=False)
         x_eval = x[indexes]
 
     h_scores = list()
@@ -33,6 +35,7 @@ def pd_pairwise_interaction(
             categorical_feature_indices=categorical_feature_indices,
             method="sample",
             kind="average",
+            seed=seed,
         )
         average_i = pd_results[0]["average"]
         average_j = pd_results[1]["average"]
@@ -49,12 +52,14 @@ def pd_overall_interaction(
     *,
     ratio_samples=None,
     categorical_feature_indices=None,
+    seed=None,
 ):
     if ratio_samples is None:
         x_eval = x.copy()
     else:
+        rng = np.random.default_rng(seed)
         num_samples = int(ratio_samples * len(x))
-        indexes = np.random.choice(x.shape[0], size=num_samples, replace=False)
+        indexes = rng.choice(x.shape[0], size=num_samples, replace=False)
         x_eval = x[indexes]
 
     h_scores = list()
@@ -69,15 +74,14 @@ def pd_overall_interaction(
             categorical_feature_indices=categorical_feature_indices,
             method="sample",
             kind="average",
+            seed=seed,
         )
         average_on_current_feature = pd_results[0]["average"]
         average_on_other_features = pd_results[1]["average"]
         y_pred = model.predict_values(x_eval).reshape(
             -1,
         )
-        h_score = compute_h_score(
-            y_pred, average_on_current_feature, average_on_other_features
-        )
+        h_score = compute_h_score(y_pred, average_on_current_feature, average_on_other_features)
         h_scores.append(h_score)
 
     return h_scores

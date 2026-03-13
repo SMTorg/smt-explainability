@@ -29,9 +29,18 @@ metadata = dict(
         "smt_explainability.problems",
         "smt_explainability.shap",
     ],
-    install_requires=["smt>=2.8.0", "smt-design-space-ext>=0.3.0"],
-    extras_require={},
-    python_requires=">=3.9",
+    install_requires=[
+        "smt>=2.13.0",
+        "smt-design-space-ext>=0.3.0",
+        "pyDOE3>=1.6.2",
+        "numpy>=2.4.0",
+        "scipy>=1.17.1",
+        "scikit-learn>=1.8.0",
+    ],
+    extras_require={
+        "test": ["pytest", "pytest-cov"],
+    },
+    python_requires=">=3.11",
     zip_safe=False,
 )
 

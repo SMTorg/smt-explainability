@@ -21,7 +21,19 @@ class PDFeatureInteractionDisplay:
         categorical_feature_indices=None,
         feature_names=None,
         ratio_samples=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         if features is None:
             features = [i for i in range(x.shape[1])]
 
@@ -34,6 +46,7 @@ class PDFeatureInteractionDisplay:
             model,
             categorical_feature_indices=categorical_feature_indices,
             ratio_samples=ratio_samples,
+            seed=seed,
         )
 
         display = PDFeatureInteractionDisplay(h_scores, feature_names)
@@ -49,7 +62,19 @@ class PDFeatureInteractionDisplay:
         categorical_feature_indices=None,
         feature_names=None,
         ratio_samples=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         if feature_names is None:
             feature_names = [rf"$x_{i}$" for i in range(x.shape[1])]
         interaction_feature_names = list()
@@ -63,6 +88,7 @@ class PDFeatureInteractionDisplay:
             model,
             categorical_feature_indices=categorical_feature_indices,
             ratio_samples=ratio_samples,
+            seed=seed,
         )
 
         display = PDFeatureInteractionDisplay(
@@ -104,18 +130,14 @@ class PDFeatureInteractionDisplay:
         indexes = np.arange(len(vis_h_scores))
         fig, ax = plt.subplots(1, 1, figsize=(length, width))
         if vert:
-            ax.barh(
-                indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8
-            )
+            ax.barh(indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8)
             ax.set_yticks(indexes)
             ax.set_yticklabels(vis_feature_names, fontsize=14)
             ax.set_xlabel("H Score", fontsize=14)
             ax.xaxis.set_tick_params(labelsize=14)
             ax.invert_yaxis()
         else:
-            ax.bar(
-                indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8
-            )
+            ax.bar(indexes, vis_h_scores, color="blue", edgecolor="black", linewidth=0.8)
             ax.set_xticks(indexes)
             ax.set_xticklabels(vis_feature_names, fontsize=14)
             ax.set_ylabel("H Score", fontsize=14)

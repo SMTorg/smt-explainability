@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: ['3.11']
+        python-version: ['3.11', '3.12', '3.13']
 
     steps:
     - uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install --upgrade pip
-        pip install -r requirements.txt  git+https://github.com/SMTorg/smt
+        pip install -r requirements.txt
         pip list
         pip install -e .
 
@@ -38,13 +38,14 @@ jobs:
 
     - name: Test with pytest and coverage
       run: |
-        pytest -v --durations=0 
+        pytest -v --durations=0 --cov=smt_explainability --cov-report=xml
 
     - name: Coveralls
       uses: AndreMiras/coveralls-python-action@develop
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel: true
-        flag-name: Test
+        flag-name: run-${{ matrix.python-version }}
 
   coveralls_finish:
     needs: test
@@ -53,4 +54,5 @@ jobs:
     - name: Coveralls Finished
       uses: AndreMiras/coveralls-python-action@develop
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         parallel-finished: true

@@ -27,6 +27,7 @@ def pd_feature_importance(
     grid_resolution=100,
     method="uniform",
     ratio_samples=None,
+    seed=None,
 ):
     pd_results = partial_dependence(
         model,
@@ -39,6 +40,7 @@ def pd_feature_importance(
         method=method,
         kind="average",
         ratio_samples=ratio_samples,
+        seed=seed,
     )
 
     is_categorical = [False] * x.shape[1]

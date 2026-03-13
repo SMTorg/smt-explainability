@@ -17,16 +17,26 @@ class ShapFeatureImportanceDisplay:
         features=None,
         feature_names=None,
         categorical_feature_indices=None,
+        seed=None,
+        random_state=None,
     ):
+        if random_state is not None:
+            import warnings
+
+            warnings.warn(
+                "random_state is deprecated, use seed instead",
+                DeprecationWarning,
+                stacklevel=2,
+            )
+            seed = seed or random_state
+
         if features is None:
             features = [i for i in range(x.shape[1])]
 
         if feature_names is None:
             feature_names = [rf"$x_{i}$" for i in features]
         elif len(feature_names) != x.shape[1]:
-            raise ValueError(
-                "Length of feature names is not the same as the number of dimensions in x."
-            )
+            raise ValueError("Length of feature names is not the same as the number of dimensions in x.")
 
         if len(features) <= x.shape[1]:
             feature_names = [feature_names[feature_idx] for feature_idx in features]
@@ -46,10 +56,9 @@ class ShapFeatureImportanceDisplay:
             x,
             is_categorical,
             method=method,
+            seed=seed,
         )
-        feature_importances = np.array(
-            [feature_importances[feature_idx] for feature_idx in features]
-        )
+        feature_importances = np.array([feature_importances[feature_idx] for feature_idx in features])
 
         display = ShapFeatureImportanceDisplay(feature_importances, feature_names)
         return display
@@ -80,9 +89,7 @@ class ShapFeatureImportanceDisplay:
 
         if sort:
             vis_feature_names = feature_names[np.argsort(feature_importances * -1)]
-            vis_feature_importances = feature_importances[
-                np.argsort(feature_importances * -1)
-            ]
+            vis_feature_importances = feature_importances[np.argsort(feature_importances * -1)]
         else:
             vis_feature_names = feature_names
             vis_feature_importances = feature_importances
