@@ -94,3 +94,30 @@ def test_hsic_adsg_provided_theta():
         X=x_samp, max_order=1, theta_scales=dummy_theta, use_kta=True, use_rf_prior=False
     )
     assert len(results_kta_mask) > 0
+
+
+def test_hsic_adsg_rf_prior():
+    # Test 6: End-to-end with the native Random Forest Permutation + Filter prior
+    # We use a slightly larger dataset (N=100) so the RF can actually capture the signal
+    # instead of filtering everything as noise.
+    np.random.seed(42)
+    ds = DesignSpace([FloatVariable(0, 1), FloatVariable(0, 1), CategoricalVariable(["A", "B"])])
+    ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[0.5, 1.0])
+
+    sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
+    x_samp = sampler(100).copy()
+    _, is_acting = ds.correct_get_acting(x_samp)
+    x_samp[~is_acting[:, 1], 1] = 0.5
+
+    # Pure signal on x0 and x1
+    y_samp = x_samp[:, 0] + np.where(is_acting[:, 1], x_samp[:, 1], 0.0)
+
+    sm = KRG(design_space=ds, print_global=False)
+    sm.set_training_values(x_samp, y_samp)
+    sm.train()
+
+    explainer = HsicAnovaAdsg(model=sm, ds=ds)
+    # Default behavior is use_rf_prior=True
+    results, total_hsic = explainer.explain(X=x_samp, max_order=1, var_names=["x0", "x1", "x2"])
+    assert total_hsic > 0, "RF prior should retain signal and yield positive HSIC."
+    assert len(results) > 0
