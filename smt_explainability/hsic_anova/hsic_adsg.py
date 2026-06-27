@@ -182,6 +182,7 @@ class HsicAnovaAdsg:
         y: Optional[np.ndarray] = None,
         max_order: int = 3,
         use_kta: bool = False,
+        use_rf_prior: bool = True,
         theta_scales: Optional[np.ndarray] = None,
         use_smt_theta: bool = True,
         var_names: Optional[List[str]] = None,
@@ -199,6 +200,9 @@ class HsicAnovaAdsg:
             Maximum interaction order to compute. Default is 3.
         use_kta : bool, optional
             Whether to optimize kernel length scales using Kernel Target Alignment.
+        use_rf_prior : bool, optional
+            If True and theta_scales is None, trains a Random Forest to generate
+            sparse length scales (the RF filtering trick). Default is True.
         theta_scales : np.ndarray, optional
             Pre-computed length scales to use.
         use_smt_theta : bool, optional
@@ -221,6 +225,20 @@ class HsicAnovaAdsg:
         # Get dynamic activity matrix for the inputs
         _, x_is_acting = self.ds.correct_get_acting(X)
         x_is_acting = np.array(x_is_acting, dtype=bool)
+
+        # Apply Random Forest sparsity prior trick if requested
+        if use_rf_prior and theta_scales is None:
+            from sklearn.ensemble import RandomForestRegressor
+            from sklearn.inspection import permutation_importance
+
+            rf = RandomForestRegressor(max_depth=10, min_samples_leaf=15, random_state=42)
+            rf.fit(X, y.ravel())
+
+            result = permutation_importance(rf, X, y.ravel(), n_repeats=10, random_state=42)
+            nu = result.importances_mean
+
+            theta_scales = np.zeros_like(nu)
+            theta_scales[nu > 0.005] = 5.0 * nu[nu > 0.005]
 
         return self._hsic_anova_hierarchical(
             X,

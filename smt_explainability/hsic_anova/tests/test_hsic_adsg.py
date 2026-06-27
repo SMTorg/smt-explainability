@@ -1,96 +1,75 @@
 import numpy as np
+from smt.design_space import DesignSpace, FloatVariable, CategoricalVariable
+from smt.surrogate_models import KRG
+from smt.sampling_methods import LHS
+from smt_explainability.hsic_anova.hsic_adsg import HsicAnovaAdsg
 
-# TODO: Replace mock functions with actual imports from smt_explainability.hsic_anova once implemented
-# from smt_explainability.hsic_anova.adsg import calculate_distance, hadamard_trace_estimator, intrinsic_variance_estimator
 
-
-def test_distance_calculations():
+def test_hsic_adsg_coverage():
     """
-    Test 1: Verify the ADSG distance calculations.
-    - Two inactive variables MUST return a distance of 0.0.
-    - An active/inactive pair MUST return 1.0.
-    """
-
-    # Mock function representing the intended behavior for TDD
-    def calculate_distance(is_active_1, is_active_2):
-        if not is_active_1 and not is_active_2:
-            return 0.0
-        elif is_active_1 != is_active_2:
-            return 1.0
-        return 0.0  # (For two active variables, it would use continuous metrics)
-
-    assert calculate_distance(False, False) == 0.0, "Two inactive variables must return 0.0"
-    assert calculate_distance(True, False) == 1.0, "Active/inactive pair must return 1.0"
-    assert calculate_distance(False, True) == 1.0, "Active/inactive pair must return 1.0"
-
-
-def test_hadamard_trace_estimator():
-    """
-    Test 2: Verify the O(N^2) Hadamard trace estimator perfectly matches the
-    naive dense O(N^3) matrix trace on a small 50x50 random Gram matrix.
+    End-to-End integration test to guarantee high code coverage for hsic_adsg.py.
+    This creates a mock hierarchical design space, trains a surrogate,
+    and extracts the HSIC-ANOVA indices under various parameters.
     """
     np.random.seed(42)
-    N = 50
 
-    # Generate random Gram matrices (symmetric, positive semi-definite)
-    A_raw = np.random.randn(N, N)
-    A = A_raw @ A_raw.T
+    # 1. Create a Mixed Hierarchical Design Space
+    ds = DesignSpace(
+        [
+            FloatVariable(0, 1),  # x0: Root
+            FloatVariable(0, 1),  # x1: Decreed continuous
+            CategoricalVariable(["A", "B"]),  # x2: Decreed categorical
+        ]
+    )
 
-    B_raw = np.random.randn(N, N)
-    B = B_raw @ B_raw.T
+    # x1 acts if x0 > 0.5
+    ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[0.5, 1.0])
+    # x2 acts if x0 < 0.5 (just to test categorical distance)
+    ds.declare_decreed_var(decreed_var=2, meta_var=0, meta_value=[0.0, 0.5])
 
-    # Naive O(N^3) calculation: Trace(A @ B)
-    naive_trace = np.trace(A @ B)
+    # 2. Sample Data
+    sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
+    x_samp_raw = sampler(30)
 
-    # O(N^2) Hadamard trace estimator: sum of element-wise product (valid since A, B are symmetric)
-    def hadamard_trace_estimator(mat_a, mat_b):
-        return np.sum(mat_a * mat_b)
+    # SMT sampling generates continuous values for categorical bounds,
+    # but we just need dummy data to run the distance algorithms.
+    x_samp = x_samp_raw.copy()
 
-    fast_trace = hadamard_trace_estimator(A, B)
+    _, is_acting = ds.correct_get_acting(x_samp)
 
-    # Check for perfect match
-    assert np.isclose(naive_trace, fast_trace), f"Trace mismatch: {naive_trace} vs {fast_trace}"
+    # Impute inactive continuous
+    x_samp[~is_acting[:, 1], 1] = 0.5
+    # Impute inactive categorical
+    x_samp[~is_acting[:, 2], 2] = 0.0
 
+    # Mock output
+    y_samp = x_samp[:, 0] + np.where(is_acting[:, 1], x_samp[:, 1], 0.0)
 
-def test_intrinsic_variance_estimator():
-    """
-    Test 3: Construct a simple mock Hierarchical Design Space (1 root variable
-    triggering 1 decreed variable) and verify the Intrinsic Variance estimator
-    successfully corrects the structural sparsity.
-    """
-    np.random.seed(42)
-    N = 100
+    # 3. Train Surrogate
+    sm = KRG(design_space=ds, print_global=False)
+    sm.set_training_values(x_samp, y_samp)
+    sm.train()
 
-    # 1 root variable in [0, 1]
-    X1 = np.random.uniform(0, 1, N)
+    # 4. Run Explainer (Median Heuristic)
+    explainer = HsicAnovaAdsg(model=sm, ds=ds)
+    results_med, total_hsic_med = explainer.explain(
+        X=x_samp, max_order=2, var_names=["x0", "x1", "x2"], use_kta=False, use_rf_prior=False
+    )
 
-    # 1 decreed variable X2, active only when X1 > 0.5
-    is_active_x2 = X1 > 0.5
+    assert total_hsic_med > 0, "Total HSIC should be positive."
+    assert len(results_med) > 0, "Should extract at least some combinations."
 
-    X2_values = np.random.randn(N)
-    # Use np.nan for inactive structural sparsity
-    X2 = np.where(is_active_x2, X2_values, np.nan)
+    # 5. Run Explainer (KTA Optimization) to cover _compute_theta_kta
+    results_kta, total_hsic_kta = explainer.explain(X=x_samp, max_order=2, use_kta=True, use_rf_prior=False)
+    assert total_hsic_kta > 0
 
-    def intrinsic_variance_estimator(x, is_active):
-        """
-        Mock estimator: Calculates variance over the active subspace and scales
-        by the probability of activation to correct structural sparsity.
-        """
-        active_mask = is_active.astype(bool)
-        p_active = np.mean(active_mask)
+    # 6. Run Explainer with provided theta_scales to cover the pre-computed branch
+    dummy_theta = np.array([1.0, 0.0, 5.0])
+    results_provided, _ = explainer.explain(
+        X=x_samp, max_order=1, theta_scales=dummy_theta, use_smt_theta=True, use_kta=False, use_rf_prior=False
+    )
 
-        if p_active == 0:
-            return 0.0
-
-        active_variance = np.var(x[active_mask])
-        return p_active * active_variance
-
-    corrected_var = intrinsic_variance_estimator(X2, is_active_x2)
-
-    # Verification
-    p_active_approx = np.mean(is_active_x2)
-    expected_intrinsic = p_active_approx * np.var(X2[is_active_x2])
-
-    assert corrected_var > 0.0, "Variance should be positive."
-    assert not np.isnan(corrected_var), "Variance should not be NaN."
-    assert np.isclose(corrected_var, expected_intrinsic), "Estimator did not correct structural sparsity correctly."
+    # 7. Run Explainer with KTA and theta_scales (to cover theta_mask initialization in L-BFGS-B)
+    results_kta_mask, _ = explainer.explain(
+        X=x_samp, max_order=1, theta_scales=dummy_theta, use_kta=True, use_rf_prior=False
+    )
