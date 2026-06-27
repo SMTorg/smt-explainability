@@ -45,11 +45,13 @@ def test_hadamard_trace():
 
 def _get_mock_data():
     np.random.seed(42)
-    ds = DesignSpace([
-        CategoricalVariable(values=[0, 1, 2]), # x0: Root
-        FloatVariable(0, 1),
-        CategoricalVariable(["A", "B"])
-    ])
+    ds = DesignSpace(
+        [
+            CategoricalVariable(values=[0, 1, 2]),  # x0: Root
+            FloatVariable(0, 1),
+            CategoricalVariable(["A", "B"]),
+        ]
+    )
     ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[1, 2])
     ds.declare_decreed_var(decreed_var=2, meta_var=0, meta_value=[0])
     sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
