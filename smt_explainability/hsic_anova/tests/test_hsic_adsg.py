@@ -2,74 +2,95 @@ import numpy as np
 from smt.design_space import DesignSpace, FloatVariable, CategoricalVariable
 from smt.surrogate_models import KRG
 from smt.sampling_methods import LHS
-from smt_explainability.hsic_anova.hsic_adsg import HsicAnovaAdsg
+from smt_explainability.hsic_anova.hsic_adsg import (
+    HsicAnovaAdsg,
+    _apply_algebraic_distance,
+    _center_kernel,
+)
 
 
-def test_hsic_adsg_coverage():
-    """
-    End-to-End integration test to guarantee high code coverage for hsic_adsg.py.
-    This creates a mock hierarchical design space, trains a surrogate,
-    and extracts the HSIC-ANOVA indices under various parameters.
-    """
+def test_algebraic_distance():
+    # Test 1: Verify distance calculations natively
+    X = np.array([[0.5, 0.5]])
+    Y = np.array([[0.5, 0.8]])
+    x_act = np.array([[True, False]])
+    y_act = np.array([[True, False]])
+    num_is_decreed = np.array([False, True])
+    is_cat = np.array([False, False])
+
+    dist = _apply_algebraic_distance(X, Y, x_act, y_act, num_is_decreed, is_cat)
+    # distance on variable 0 should be 0 (0.5 - 0.5)
+    assert dist[0, 0, 0] == 0.0
+    # distance on variable 1 should be 0.0 because both are inactive
+    assert dist[0, 0, 1] == 0.0
+
+
+def test_hadamard_trace():
+    # Test 2: Verify O(N^2) trace matching O(N^3)
     np.random.seed(42)
+    N = 15
+    A_raw = np.random.randn(N, N)
+    K = A_raw @ A_raw.T
 
-    # 1. Create a Mixed Hierarchical Design Space
-    ds = DesignSpace(
-        [
-            FloatVariable(0, 1),  # x0: Root
-            FloatVariable(0, 1),  # x1: Decreed continuous
-            CategoricalVariable(["A", "B"]),  # x2: Decreed categorical
-        ]
-    )
+    # O(N^2) fast centering
+    Kc = _center_kernel(K)
 
-    # x1 acts if x0 > 0.5
+    # Naive O(N^3) centering
+    J = np.ones((N, N))
+    H = np.eye(N) - (1.0 / N) * J
+    Kc_naive = H @ K @ H
+
+    assert np.allclose(Kc, Kc_naive)
+
+
+def _get_mock_data():
+    np.random.seed(42)
+    ds = DesignSpace([FloatVariable(0, 1), FloatVariable(0, 1), CategoricalVariable(["A", "B"])])
     ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[0.5, 1.0])
-    # x2 acts if x0 < 0.5 (just to test categorical distance)
     ds.declare_decreed_var(decreed_var=2, meta_var=0, meta_value=[0.0, 0.5])
-
-    # 2. Sample Data
     sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
-    x_samp_raw = sampler(30)
-
-    # SMT sampling generates continuous values for categorical bounds,
-    # but we just need dummy data to run the distance algorithms.
-    x_samp = x_samp_raw.copy()
-
+    x_samp = sampler(30).copy()
     _, is_acting = ds.correct_get_acting(x_samp)
-
-    # Impute inactive continuous
     x_samp[~is_acting[:, 1], 1] = 0.5
-    # Impute inactive categorical
     x_samp[~is_acting[:, 2], 2] = 0.0
-
-    # Mock output
     y_samp = x_samp[:, 0] + np.where(is_acting[:, 1], x_samp[:, 1], 0.0)
 
-    # 3. Train Surrogate
     sm = KRG(design_space=ds, print_global=False)
     sm.set_training_values(x_samp, y_samp)
     sm.train()
+    return sm, ds, x_samp
 
-    # 4. Run Explainer (Median Heuristic)
+
+def test_hsic_adsg_median():
+    # Test 3: End-to-end with median heuristic
+    sm, ds, x_samp = _get_mock_data()
     explainer = HsicAnovaAdsg(model=sm, ds=ds)
-    results_med, total_hsic_med = explainer.explain(
+    results, total_hsic = explainer.explain(
         X=x_samp, max_order=2, var_names=["x0", "x1", "x2"], use_kta=False, use_rf_prior=False
     )
+    assert total_hsic > 0
+    assert len(results) > 0
 
-    assert total_hsic_med > 0, "Total HSIC should be positive."
-    assert len(results_med) > 0, "Should extract at least some combinations."
 
-    # 5. Run Explainer (KTA Optimization) to cover _compute_theta_kta
-    results_kta, total_hsic_kta = explainer.explain(X=x_samp, max_order=2, use_kta=True, use_rf_prior=False)
-    assert total_hsic_kta > 0
+def test_hsic_adsg_kta():
+    # Test 4: End-to-end with KTA optimization
+    sm, ds, x_samp = _get_mock_data()
+    explainer = HsicAnovaAdsg(model=sm, ds=ds)
+    results, total_hsic = explainer.explain(X=x_samp, max_order=2, use_kta=True, use_rf_prior=False)
+    assert total_hsic > 0
 
-    # 6. Run Explainer with provided theta_scales to cover the pre-computed branch
+
+def test_hsic_adsg_provided_theta():
+    # Test 5: End-to-end with provided theta scales and KTA
+    sm, ds, x_samp = _get_mock_data()
+    explainer = HsicAnovaAdsg(model=sm, ds=ds)
     dummy_theta = np.array([1.0, 0.0, 5.0])
-    results_provided, _ = explainer.explain(
+    results_prov, _ = explainer.explain(
         X=x_samp, max_order=1, theta_scales=dummy_theta, use_smt_theta=True, use_kta=False, use_rf_prior=False
     )
+    assert len(results_prov) > 0
 
-    # 7. Run Explainer with KTA and theta_scales (to cover theta_mask initialization in L-BFGS-B)
     results_kta_mask, _ = explainer.explain(
         X=x_samp, max_order=1, theta_scales=dummy_theta, use_kta=True, use_rf_prior=False
     )
+    assert len(results_kta_mask) > 0
