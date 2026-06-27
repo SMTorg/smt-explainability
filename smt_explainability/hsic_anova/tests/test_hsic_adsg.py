@@ -45,14 +45,16 @@ def test_hadamard_trace():
 
 def _get_mock_data():
     np.random.seed(42)
-    ds = DesignSpace([FloatVariable(0, 1), FloatVariable(0, 1), CategoricalVariable(["A", "B"])])
-    ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[0.5, 1.0])
-    ds.declare_decreed_var(decreed_var=2, meta_var=0, meta_value=[0.0, 0.5])
+    ds = DesignSpace([
+        CategoricalVariable(values=[0, 1, 2]), # x0: Root
+        FloatVariable(0, 1),
+        CategoricalVariable(["A", "B"])
+    ])
+    ds.declare_decreed_var(decreed_var=1, meta_var=0, meta_value=[1, 2])
+    ds.declare_decreed_var(decreed_var=2, meta_var=0, meta_value=[0])
     sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
     x_samp = sampler(30).copy()
-    _, is_acting = ds.correct_get_acting(x_samp)
-    x_samp[~is_acting[:, 1], 1] = 0.5
-    x_samp[~is_acting[:, 2], 2] = 0.0
+    x_samp, is_acting = ds.correct_get_acting(x_samp)
     y_samp = x_samp[:, 0] + np.where(is_acting[:, 1], x_samp[:, 1], 0.0)
 
     sm = KRG(design_space=ds, print_global=False)
@@ -106,8 +108,7 @@ def test_hsic_adsg_rf_prior():
 
     sampler = LHS(xlimits=ds.get_num_bounds(), criterion="ese", seed=42)
     x_samp = sampler(100).copy()
-    _, is_acting = ds.correct_get_acting(x_samp)
-    x_samp[~is_acting[:, 1], 1] = 0.5
+    x_samp, is_acting = ds.correct_get_acting(x_samp)
 
     # Pure signal on x0 and x1
     y_samp = x_samp[:, 0] + np.where(is_acting[:, 1], x_samp[:, 1], 0.0)
