@@ -41,7 +41,7 @@ state-of-the-art explainability techniques.
   Split conformal prediction for distribution-free prediction intervals.
 
 - **Global Sensitivity Analysis**  
-  Sobol indices and variance-based importance measures.
+  Sobol indices, variance-based importance measures, and HSIC-ANOVA for hierarchical design spaces.
 
 - **Reproducible Sampling**
   Deterministic random generators using `seed` for reproducible experiments.
