@@ -229,16 +229,46 @@ class HsicAnovaAdsg:
         # Apply Random Forest sparsity prior trick if requested
         if use_rf_prior and theta_scales is None:
             from sklearn.ensemble import RandomForestRegressor
-            from sklearn.inspection import permutation_importance
 
             rf = RandomForestRegressor(max_depth=10, min_samples_leaf=15, random_state=42)
-            rf.fit(X, y.ravel())
+            y_np = y.ravel()
+            rf.fit(X, y_np)
 
-            result = permutation_importance(rf, X, y.ravel(), n_repeats=10, random_state=42)
-            nu = result.importances_mean
+            n_features = X.shape[1]
+            nu = np.zeros(n_features)
+            np.random.seed(42)
+
+            for i in range(n_features):
+                active_idx = np.where(x_is_acting[:, i])[0]
+                if len(active_idx) < 2:
+                    nu[i] = 0.0
+                    continue
+
+                pred_base = rf.predict(X[active_idx])
+                mse_base = np.mean((y_np[active_idx] - pred_base) ** 2)
+                var_active = np.var(y_np[active_idx])
+
+                mse_shuff = 0.0
+                n_repeats = 10
+                for _ in range(n_repeats):
+                    xt_shuff = np.copy(X)
+
+                    # Numpy advanced indexing returns a copy, so we must extract, shuffle, and re-assign
+                    shuffled_vals = np.copy(xt_shuff[active_idx, i])
+                    np.random.shuffle(shuffled_vals)
+                    xt_shuff[active_idx, i] = shuffled_vals
+
+                    pred_shuff = rf.predict(xt_shuff[active_idx])
+                    mse_shuff += np.mean((y_np[active_idx] - pred_shuff) ** 2)
+                mse_shuff /= n_repeats
+
+                if var_active > 1e-6:
+                    nu[i] = max(0.0, (mse_shuff - mse_base) / var_active)
+                else:
+                    nu[i] = 0.0
 
             theta_scales = np.zeros_like(nu)
-            theta_scales[nu > 0.005] = 5.0 * nu[nu > 0.005]
+            theta_scales[nu > 0.001] = 5.0 * nu[nu > 0.001]
 
         return self._hsic_anova_hierarchical(
             X,
