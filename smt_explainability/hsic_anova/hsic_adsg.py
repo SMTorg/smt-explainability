@@ -243,25 +243,25 @@ class HsicAnovaAdsg:
                 if len(active_idx) < 2:
                     nu[i] = 0.0
                     continue
-                
+
                 pred_base = rf.predict(X[active_idx])
-                mse_base = np.mean((y_np[active_idx] - pred_base)**2)
+                mse_base = np.mean((y_np[active_idx] - pred_base) ** 2)
                 var_active = np.var(y_np[active_idx])
-                
+
                 mse_shuff = 0.0
                 n_repeats = 10
                 for _ in range(n_repeats):
                     xt_shuff = np.copy(X)
-                    
+
                     # Numpy advanced indexing returns a copy, so we must extract, shuffle, and re-assign
                     shuffled_vals = np.copy(xt_shuff[active_idx, i])
                     np.random.shuffle(shuffled_vals)
                     xt_shuff[active_idx, i] = shuffled_vals
-                    
+
                     pred_shuff = rf.predict(xt_shuff[active_idx])
-                    mse_shuff += np.mean((y_np[active_idx] - pred_shuff)**2)
+                    mse_shuff += np.mean((y_np[active_idx] - pred_shuff) ** 2)
                 mse_shuff /= n_repeats
-                
+
                 if var_active > 1e-6:
                     nu[i] = max(0.0, (mse_shuff - mse_base) / var_active)
                 else:
