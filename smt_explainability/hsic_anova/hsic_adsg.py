@@ -230,9 +230,20 @@ class HsicAnovaAdsg:
         if use_rf_prior and theta_scales is None:
             from sklearn.ensemble import RandomForestRegressor
 
+            # --- Gemini Trick: Random Marginal Imputation for RF ---
+            # To prevent the RF from using inactive imputed constants as a split proxy
+            X_rf = np.copy(X)
+            rng = np.random.RandomState(42)
+
+            for i in range(X.shape[1]):
+                inactive_idx = np.where(~x_is_acting[:, i])[0]
+                active_idx = np.where(x_is_acting[:, i])[0]
+                if len(inactive_idx) > 0 and len(active_idx) > 0:
+                    X_rf[inactive_idx, i] = rng.choice(X[active_idx, i], size=len(inactive_idx))
+
             rf = RandomForestRegressor(max_depth=10, min_samples_leaf=15, random_state=42)
             y_np = y.ravel()
-            rf.fit(X, y_np)
+            rf.fit(X_rf, y_np)
 
             n_features = X.shape[1]
             nu = np.zeros(n_features)
